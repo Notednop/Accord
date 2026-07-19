@@ -79,6 +79,7 @@ import kotlinx.coroutines.sync.Semaphore
 import org.akanework.gramophone.BuildConfig
 import org.akanework.gramophone.R
 import org.akanework.gramophone.logic.utils.CircularShuffleOrder
+import org.akanework.gramophone.logic.utils.DacBypassHelper
 import org.akanework.gramophone.logic.utils.LastPlayedManager
 import org.akanework.gramophone.logic.utils.LrcUtils.extractAndParseLyrics
 import org.akanework.gramophone.logic.utils.LrcUtils.loadAndParseLyricsFile
@@ -178,6 +179,7 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         instanceForWidgetAndLyricsOnly = this
         handler = Handler(Looper.getMainLooper())
         super.onCreate()
+        DacBypassHelper.register(this)
         nm = NotificationManagerCompat.from(this)
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
         setListener(this)
@@ -373,6 +375,7 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
     // alongside with the mediaSession.
     override fun onDestroy() {
         instanceForWidgetAndLyricsOnly = null
+        DacBypassHelper.unregister(this)
         // Important: this must happen before sending stop() as that changes state ENDED -> IDLE
         lastPlayedManager.save()
         mediaSession!!.player.stop()

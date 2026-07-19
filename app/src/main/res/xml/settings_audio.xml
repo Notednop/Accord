@@ -24,6 +24,15 @@
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
+            android:key="dac_bypass"
+            android:layout="@layout/preference_switch"
+            android:summary="@string/settings_dac_bypass_summary"
+            android:title="@string/settings_dac_bypass"
+            android:widgetLayout="@layout/preference_switch_widget"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
             android:key="floatoutput"
             android:layout="@layout/preference_switch"
             android:summary="@string/settings_float_output_summary"
