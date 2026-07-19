@@ -1,0 +1,41 @@
+name: Build and Upload Debug APK
+
+on:
+  push:
+    branches:
+      - main # Sesuaikan dengan nama branch kamu
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: # Memungkinkan trigger manual dari tab Actions
+
+jobs:
+  build:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17' # Ubah ke '11' jika kamu menggunakan versi Android Studio/Gradle lama
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # Menjalankan task assembleDebug tanpa butuh konfigurasi keystore
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+
+      # Mengunggah hasil build (APK) ke Artifacts GitHub
+      - name: Upload Debug APK to Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk # Nama file saat di-download nanti
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 7 # Artifact akan otomatis terhapus dalam 7 hari
