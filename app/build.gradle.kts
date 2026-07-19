@@ -75,11 +75,16 @@ android {
 
     signingConfigs {
         create("release") {
-            if (project.hasProperty("AKANE_RELEASE_KEY_ALIAS")) {
-                storeFile = file(project.properties["AKANE_RELEASE_STORE_FILE"].toString())
-                storePassword = project.properties["AKANE_RELEASE_STORE_PASSWORD"].toString()
-                keyAlias = project.properties["AKANE_RELEASE_KEY_ALIAS"].toString()
-                keyPassword = project.properties["AKANE_RELEASE_KEY_PASSWORD"].toString()
+            val keyAliasProp = project.findProperty("AKANE_RELEASE_KEY_ALIAS")?.toString()
+            val storePath = project.findProperty("AKANE_RELEASE_STORE_FILE")?.toString()
+            if (!keyAliasProp.isNullOrBlank() && !storePath.isNullOrBlank()) {
+                val storeFileObj = file(storePath)
+                if (storeFileObj.exists() && storeFileObj.length() > 0) {
+                    storeFile = storeFileObj
+                    storePassword = project.properties["AKANE_RELEASE_STORE_PASSWORD"].toString()
+                    keyAlias = keyAliasProp
+                    keyPassword = project.properties["AKANE_RELEASE_KEY_PASSWORD"].toString()
+                }
             }
         }
     }
@@ -114,14 +119,26 @@ android {
                 isMinifyEnabled = false
                 isProfileable = true
             }
-            if (project.hasProperty("AKANE_RELEASE_KEY_ALIAS")) {
-                signingConfig = signingConfigs["release"]
+            val keyAliasProp = project.findProperty("AKANE_RELEASE_KEY_ALIAS")?.toString()
+            val storePath = project.findProperty("AKANE_RELEASE_STORE_FILE")?.toString()
+            if (!keyAliasProp.isNullOrBlank() && !storePath.isNullOrBlank()) {
+                val storeFileObj = file(storePath)
+                if (storeFileObj.exists() && storeFileObj.length() > 0) {
+                    signingConfig = signingConfigs["release"]
+                }
             }
         }
         debug {
             applicationIdSuffix = ".debug"
-            if (project.hasProperty("AKANE_RELEASE_KEY_ALIAS")) {
-                signingConfig = signingConfigs["release"]
+            val keyAliasProp = project.findProperty("AKANE_RELEASE_KEY_ALIAS")?.toString()
+            val storePath = project.findProperty("AKANE_RELEASE_STORE_FILE")?.toString()
+            if (!keyAliasProp.isNullOrBlank() && !storePath.isNullOrBlank()) {
+                val storeFileObj = file(storePath)
+                if (storeFileObj.exists() && storeFileObj.length() > 0) {
+                    signingConfig = signingConfigs["release"]
+                } else {
+                    signingConfig = signingConfigs["debug"]
+                }
             } else {
                 signingConfig = signingConfigs["debug"]
             }
