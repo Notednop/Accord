@@ -90,6 +90,32 @@
 
     <PreferenceCategory
         android:layout="@layout/preference_category_md"
+        android:title="@string/settings_category_equalizer">
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="eq_enabled"
+            android:layout="@layout/preference_switch"
+            android:summary="@string/settings_eq_enabled_summary"
+            android:title="@string/settings_eq_enabled"
+            android:widgetLayout="@layout/preference_switch_widget"
+            app:iconSpaceReserved="false" />
+
+        <DropDownPreference
+            android:defaultValue="0"
+            android:entries="@array/eq_preset_entries"
+            android:entryValues="@array/eq_preset_values"
+            android:key="eq_preset"
+            android:layout="@layout/preference_dropdown_md"
+            android:summary="@string/settings_eq_preset_summary"
+            android:title="@string/settings_eq_preset"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_md"
         android:title="@string/settings_category_misc">
 
         <SwitchPreferenceCompat

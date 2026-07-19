@@ -80,6 +80,7 @@ import org.akanework.gramophone.BuildConfig
 import org.akanework.gramophone.R
 import org.akanework.gramophone.logic.utils.CircularShuffleOrder
 import org.akanework.gramophone.logic.utils.DacBypassHelper
+import org.akanework.gramophone.logic.utils.EqualizerHelper
 import org.akanework.gramophone.logic.utils.LastPlayedManager
 import org.akanework.gramophone.logic.utils.LrcUtils.extractAndParseLyrics
 import org.akanework.gramophone.logic.utils.LrcUtils.loadAndParseLyricsFile
@@ -98,6 +99,12 @@ import kotlin.random.Random
 @androidx.annotation.OptIn(UnstableApi::class)
 class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Listener,
     MediaLibraryService.MediaLibrarySession.Callback, Player.Listener {
+
+    private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key == "eq_enabled" || key == "eq_preset") {
+            EqualizerHelper.updateEqualizerState(this)
+        }
+    }
 
     companion object {
         private const val TAG = "GramoPlaybackService"
@@ -182,6 +189,7 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         DacBypassHelper.register(this)
         nm = NotificationManagerCompat.from(this)
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        prefs.registerOnSharedPreferenceChangeListener(prefListener)
         setListener(this)
         setMediaNotificationProvider(
             DefaultMediaNotificationProvider.Builder(this).build().apply {
@@ -277,6 +285,7 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         }
         player.exoPlayer.audioSessionId = Util.generateAudioSessionIdV21(this)
         lastSessionId = player.exoPlayer.audioSessionId
+        EqualizerHelper.initEqualizer(this, lastSessionId)
         if (DacBypassHelper.shouldLockVolume(this)) {
             player.exoPlayer.volume = 1.0f
         }
@@ -378,7 +387,9 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
     // alongside with the mediaSession.
     override fun onDestroy() {
         instanceForWidgetAndLyricsOnly = null
+        prefs.unregisterOnSharedPreferenceChangeListener(prefListener)
         DacBypassHelper.unregister(this)
+        EqualizerHelper.release()
         // Important: this must happen before sending stop() as that changes state ENDED -> IDLE
         lastPlayedManager.save()
         mediaSession!!.player.stop()
