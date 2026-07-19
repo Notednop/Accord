@@ -122,6 +122,8 @@ android {
             applicationIdSuffix = ".debug"
             if (project.hasProperty("AKANE_RELEASE_KEY_ALIAS")) {
                 signingConfig = signingConfigs["release"]
+            } else {
+                signingConfig = signingConfigs["debug"]
             }
         }
     }
