@@ -277,6 +277,9 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         }
         player.exoPlayer.audioSessionId = Util.generateAudioSessionIdV21(this)
         lastSessionId = player.exoPlayer.audioSessionId
+        if (DacBypassHelper.shouldLockVolume(this)) {
+            player.exoPlayer.volume = 1.0f
+        }
         broadcastAudioSession()
         lastPlayedManager = LastPlayedManager(this, player)
         lastPlayedManager.allowSavingState = false

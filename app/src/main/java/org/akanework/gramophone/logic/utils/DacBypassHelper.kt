@@ -29,6 +29,13 @@ object DacBypassHelper {
         }
     }
 
+    fun shouldLockVolume(context: Context): Boolean {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val dacBypass = prefs.getBooleanStrict("dac_bypass", false)
+        val volumeMode = prefs.getString("usb_volume_mode", "0") ?: "0"
+        return dacBypass && volumeMode == "1"
+    }
+
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     private fun registerApi34(context: Context) {
         if (audioDeviceCallback != null) return
@@ -42,7 +49,7 @@ object DacBypassHelper {
 
                 for (device in addedDevices) {
                     if (isUsbDevice(device)) {
-                        applyBitPerfectForDevice(audioManager, device)
+                        applyBitPerfectForDevice(context, audioManager, device)
                     }
                 }
             }
@@ -61,7 +68,7 @@ object DacBypassHelper {
             val devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
             for (device in devices) {
                 if (isUsbDevice(device)) {
-                    applyBitPerfectForDevice(audioManager, device)
+                    applyBitPerfectForDevice(context, audioManager, device)
                 }
             }
         }
@@ -90,25 +97,47 @@ object DacBypassHelper {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun isUsbDevice(device: AudioDeviceInfo): Boolean {
+        // Broaden detection to also include WIRED headset and headphones
+        // because many USB-C DAC dongles report as TYPE_WIRED_HEADSET or TYPE_WIRED_HEADPHONES
         return device.type == AudioDeviceInfo.TYPE_USB_DEVICE ||
                 device.type == AudioDeviceInfo.TYPE_USB_HEADSET ||
-                device.type == AudioDeviceInfo.TYPE_USB_ACCESSORY
+                device.type == AudioDeviceInfo.TYPE_USB_ACCESSORY ||
+                device.type == AudioDeviceInfo.TYPE_WIRED_HEADSET ||
+                device.type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES
     }
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    private fun applyBitPerfectForDevice(audioManager: AudioManager, device: AudioDeviceInfo) {
+    private fun applyBitPerfectForDevice(context: Context, audioManager: AudioManager, device: AudioDeviceInfo) {
         try {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val exclusiveEnabled = prefs.getBooleanStrict("usb_exclusive_access", false)
+            val fixedRateStr = prefs.getString("usb_fixed_output", "0") ?: "0"
+            val fixedRate = fixedRateStr.toIntOrNull() ?: 0
+
             val mixerAttributesList = audioManager.getSupportedMixerAttributes(device)
-            val bitPerfectMixerAttr = mixerAttributesList.firstOrNull {
-                it.mixerBehavior == AudioMixerAttributes.MIXER_BEHAVIOR_BIT_PERFECT
+            var selectedAttr: AudioMixerAttributes? = null
+
+            if (fixedRate > 0) {
+                selectedAttr = mixerAttributesList.firstOrNull {
+                    it.format.sampleRate == fixedRate &&
+                    (!exclusiveEnabled || it.mixerBehavior == AudioMixerAttributes.MIXER_BEHAVIOR_BIT_PERFECT)
+                } ?: mixerAttributesList.firstOrNull {
+                    it.format.sampleRate == fixedRate
+                }
             }
-            if (bitPerfectMixerAttr != null) {
+
+            if (selectedAttr == null) {
+                selectedAttr = mixerAttributesList.firstOrNull {
+                    it.mixerBehavior == AudioMixerAttributes.MIXER_BEHAVIOR_BIT_PERFECT
+                }
+            }
+
+            if (selectedAttr != null) {
                 val attr = AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
                     .build()
-                audioManager.setPreferredMixerAttributes(attr, device, bitPerfectMixerAttr)
+                audioManager.setPreferredMixerAttributes(attr, device, selectedAttr)
             }
         } catch (e: Exception) {
             e.printStackTrace()

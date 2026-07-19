@@ -24,15 +24,6 @@
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
-            android:key="dac_bypass"
-            android:layout="@layout/preference_switch"
-            android:summary="@string/settings_dac_bypass_summary"
-            android:title="@string/settings_dac_bypass"
-            android:widgetLayout="@layout/preference_switch_widget"
-            app:iconSpaceReserved="false" />
-
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
             android:key="floatoutput"
             android:layout="@layout/preference_switch"
             android:summary="@string/settings_float_output_summary"
@@ -48,6 +39,52 @@
             android:title="@string/settings_hardware_acceleration"
             android:widgetLayout="@layout/preference_switch_widget"
             app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_md"
+        android:title="@string/settings_category_usb_audio">
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="dac_bypass"
+            android:layout="@layout/preference_switch"
+            android:summary="@string/settings_dac_bypass_summary"
+            android:title="@string/settings_dac_bypass"
+            android:widgetLayout="@layout/preference_switch_widget"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="usb_exclusive_access"
+            android:layout="@layout/preference_switch"
+            android:summary="@string/settings_usb_exclusive_access_summary"
+            android:title="@string/settings_usb_exclusive_access"
+            android:widgetLayout="@layout/preference_switch_widget"
+            app:iconSpaceReserved="false" />
+
+        <DropDownPreference
+            android:defaultValue="0"
+            android:entries="@array/usb_fixed_output_entries"
+            android:entryValues="@array/usb_fixed_output_values"
+            android:key="usb_fixed_output"
+            android:layout="@layout/preference_dropdown_md"
+            android:summary="@string/settings_usb_fixed_output_summary"
+            android:title="@string/settings_usb_fixed_output"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+
+        <DropDownPreference
+            android:defaultValue="0"
+            android:entries="@array/usb_volume_mode_entries"
+            android:entryValues="@array/usb_volume_mode_values"
+            android:key="usb_volume_mode"
+            android:layout="@layout/preference_dropdown_md"
+            android:summary="@string/settings_usb_volume_mode_summary"
+            android:title="@string/settings_usb_volume_mode"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
 

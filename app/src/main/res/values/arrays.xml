@@ -11,4 +11,30 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+
+    <string-array name="usb_fixed_output_entries" translatable="false">
+        <item>@string/usb_fixed_output_source</item>
+        <item>@string/usb_fixed_output_44100</item>
+        <item>@string/usb_fixed_output_48000</item>
+        <item>@string/usb_fixed_output_96000</item>
+        <item>@string/usb_fixed_output_192000</item>
+    </string-array>
+
+    <string-array name="usb_fixed_output_values" translatable="false">
+        <item>0</item>
+        <item>44100</item>
+        <item>48000</item>
+        <item>96000</item>
+        <item>192000</item>
+    </string-array>
+
+    <string-array name="usb_volume_mode_entries" translatable="false">
+        <item>@string/usb_volume_mode_software</item>
+        <item>@string/usb_volume_mode_hardware</item>
+    </string-array>
+
+    <string-array name="usb_volume_mode_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
 </resources>
